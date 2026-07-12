@@ -1,0 +1,4 @@
+interface:
+  display_name: "CanvasX"
+  short_description: "Build one-file interactive browser canvases"
+  default_prompt: "Use $canvasx to turn this material into one browser-openable interactive HTML file."

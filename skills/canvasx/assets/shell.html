@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <title>__CANVAS_TITLE__</title>
+    <style>
+      :root {
+        font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color-scheme: dark;
+        background: #181818;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-width: 320px; background: var(--canvas-editor, #181818); }
+      button, input, textarea, select { font: inherit; }
+      .canvas-page { width: min(1180px, 100%); min-height: 100vh; margin: 0 auto; padding: 28px 24px 48px; }
+      @media (max-width: 640px) { .canvas-page { padding: 18px 12px 32px; } }
+    </style>
+    <script crossorigin="anonymous" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-/AfDwVDXNopzPvhxMPQ11y1OCpR6mVkWx47qzSwIiquvxkcMkZddEzDNtIOtfCpk" src="https://cdn.jsdelivr.net/npm/prop-types@15.8.1/prop-types.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-8WLbYxXTeAFm5KD1lWOhUghb4T1QP+Y15d4aEGIFc6zzN2BMObhTK1u7mXiLbp8p" src="https://cdn.jsdelivr.net/npm/recharts@2.15.4/umd/Recharts.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-APx0Be9S9z04dTSdhLIIDbTZcU5XrIh2mdU3KlrwJ6+r/5wn/XSXNb6BBAGWZ++D" src="https://cdn.jsdelivr.net/npm/@dagrejs/dagre@1.1.8/dist/dagre.min.js"></script>
+    <script>window.react = window.React;</script>
+    <script crossorigin="anonymous" integrity="sha384-qFcdbwMyfX+xh/c/86ZgBLJ044k8zeF5gQSiNqUbPTRe5IkL+mhWXtW6D9CGDWz2" src="https://cdn.jsdelivr.net/npm/lucide-react@0.468.0/dist/umd/lucide-react.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha384-mP9sW+eK08VvAmlxEkn9Kn6egvKFtnFEfW7/u9feUWAIoTvnYAzT4NwsskP+uWUd" src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.28.5/babel.min.js"></script>
+    <script>
+/*__STANDALONE_CANVAS_UMD__*/
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel" data-presets="react">
+      /* CANVAS_APP_START */
+      const {
+        BarChart,
+        CanvasProvider,
+        Card,
+        CardBody,
+        CardHeader,
+        Grid,
+        H1,
+        Pill,
+        Stack,
+        Stat,
+        Table,
+        Text,
+      } = StandaloneCanvas;
+
+      const weeklyTraffic = {
+        categories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+        series: [
+          { name: "Requests", data: [84, 96, 91, 108, 116], tone: "info" },
+          { name: "Cached", data: [52, 61, 58, 72, 79], tone: "success" },
+        ],
+      };
+
+      function CanvasApp() {
+        const theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        return (
+          <CanvasProvider theme={theme} storagePrefix="__CANVAS_STORAGE_KEY__">
+            <main className="canvas-page">
+              <Stack gap={22}>
+                <Stack gap={6}>
+                  <Pill size="sm" active>Live report</Pill>
+                  <H1>Operations overview</H1>
+                  <Text tone="secondary">A browser-native report delivered as one HTML file.</Text>
+                </Stack>
+                <Grid columns="repeat(auto-fit, minmax(150px, 1fr))" gap={14}>
+                  <Stat value="99.98%" label="Availability" tone="success" />
+                  <Stat value="184 ms" label="P95 latency" tone="info" />
+                  <Stat value="0" label="Open incidents" />
+                </Grid>
+                <Grid columns="repeat(auto-fit, minmax(min(100%, 340px), 1fr))" gap={16}>
+                  <Card>
+                    <CardHeader>Weekly traffic</CardHeader>
+                    <CardBody>
+                      <BarChart {...weeklyTraffic} height={240} />
+                    </CardBody>
+                  </Card>
+                  <Card>
+                    <CardHeader>Service health</CardHeader>
+                    <CardBody>
+                      <Table
+                        headers={["Service", "Status", "Latency"]}
+                        rows={[
+                          ["Gateway", "Healthy", "122 ms"],
+                          ["API", "Healthy", "184 ms"],
+                          ["Workers", "Healthy", "91 ms"],
+                        ]}
+                        striped
+                      />
+                    </CardBody>
+                  </Card>
+                </Grid>
+              </Stack>
+            </main>
+          </CanvasProvider>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(
+        <React.StrictMode>
+          <CanvasApp />
+        </React.StrictMode>,
+      );
+      /* CANVAS_APP_END */
+    </script>
+  </body>
+</html>

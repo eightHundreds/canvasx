@@ -1,0 +1,16 @@
+{
+  "name": "@canvasx/react",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.tsx",
+      "default": "./src/index.tsx"
+    },
+    "./host": {
+      "types": "./src/standalone-host.ts",
+      "default": "./src/standalone-host.ts"
+    }
+  }
+}
