@@ -1,0 +1,4 @@
+interface:
+  display_name: "Docs CanvasX"
+  short_description: "Turn technical documentation into navigable canvases"
+  default_prompt: "Use $docs-canvasx to turn this documentation into a navigable standalone HTML canvas."

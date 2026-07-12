@@ -12,13 +12,19 @@ Install the `canvasx` Skill from GitHub with the [Skills CLI](https://skills.sh/
 npx skills add https://github.com/eightHundreds/canvasx --skill canvasx
 ```
 
+For documentation canvases, install the companion Skill too:
+
+```bash
+npx skills add https://github.com/eightHundreds/canvasx --skill docs-canvasx
+```
+
 Or install it from a local clone:
 
 ```bash
 npx skills add . --skill canvasx
 ```
 
-Then ask your agent to use `$canvasx`.
+Then ask your agent to use `$canvasx`, or `$docs-canvasx` for architecture notes, API references, runbooks, and codebase walkthroughs.
 
 The Skill includes the compiled `canvasx.umd.js`; users do not install npm packages or run a build. Generated HTML files embed CanvasX and load pinned React, Recharts, Dagre, Lucide React, and Babel runtimes from CDN.
 
