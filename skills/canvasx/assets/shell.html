@@ -34,68 +34,14 @@
     <script type="text/babel" data-presets="react">
       /* CANVAS_APP_START */
       const {
-        BarChart,
         CanvasProvider,
-        Card,
-        CardBody,
-        CardHeader,
-        Grid,
-        H1,
-        Pill,
-        Stack,
-        Stat,
-        Table,
-        Text,
       } = StandaloneCanvas;
-
-      const weeklyTraffic = {
-        categories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-        series: [
-          { name: "Requests", data: [84, 96, 91, 108, 116], tone: "info" },
-          { name: "Cached", data: [52, 61, 58, 72, 79], tone: "success" },
-        ],
-      };
 
       function CanvasApp() {
         const theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
         return (
           <CanvasProvider theme={theme} storagePrefix="__CANVAS_STORAGE_KEY__">
-            <main className="canvas-page">
-              <Stack gap={22}>
-                <Stack gap={6}>
-                  <Pill size="sm" active>Live report</Pill>
-                  <H1>Operations overview</H1>
-                  <Text tone="secondary">A browser-native report delivered as one HTML file.</Text>
-                </Stack>
-                <Grid columns="repeat(auto-fit, minmax(150px, 1fr))" gap={14}>
-                  <Stat value="99.98%" label="Availability" tone="success" />
-                  <Stat value="184 ms" label="P95 latency" tone="info" />
-                  <Stat value="0" label="Open incidents" />
-                </Grid>
-                <Grid columns="repeat(auto-fit, minmax(min(100%, 340px), 1fr))" gap={16}>
-                  <Card>
-                    <CardHeader>Weekly traffic</CardHeader>
-                    <CardBody>
-                      <BarChart {...weeklyTraffic} height={240} />
-                    </CardBody>
-                  </Card>
-                  <Card>
-                    <CardHeader>Service health</CardHeader>
-                    <CardBody>
-                      <Table
-                        headers={["Service", "Status", "Latency"]}
-                        rows={[
-                          ["Gateway", "Healthy", "122 ms"],
-                          ["API", "Healthy", "184 ms"],
-                          ["Workers", "Healthy", "91 ms"],
-                        ]}
-                        striped
-                      />
-                    </CardBody>
-                  </Card>
-                </Grid>
-              </Stack>
-            </main>
+            <main className="canvas-page" />
           </CanvasProvider>
         );
       }

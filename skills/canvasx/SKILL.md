@@ -29,8 +29,8 @@ Read the relevant reference when exact props, defaults, composition rules, or ho
 
 1. Treat the directory containing this `SKILL.md` as `<skill-dir>`.
 2. Run `node <skill-dir>/scripts/create_canvas.mjs <absolute-output.html> --title "<title>"`.
-3. Replace only the code between `CANVAS_APP_START` and `CANVAS_APP_END`.
-4. Keep the existing `CanvasProvider`, or provide an equivalent top-level provider with a stable artifact-specific `storagePrefix`.
+3. Replace the entire contents between `CANVAS_APP_START` and `CANVAS_APP_END`. Do not preserve or partially edit the generated scaffold.
+4. Include an equivalent top-level `CanvasProvider` with a stable artifact-specific `storagePrefix` in the replacement block.
 
 The generator uses only Node built-ins. Do not run `npm install`, `pnpm install`, a bundler, or a development server.
 

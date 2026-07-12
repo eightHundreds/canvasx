@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import babelParser from "../assets/vendor/babel-parser.cjs";
 
 const skillRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const publicExports = new Set(JSON.parse(fs.readFileSync(path.join(skillRoot, "assets", "runtime-exports.json"), "utf8")));
@@ -17,9 +18,54 @@ if (!input) {
 const absolute = path.resolve(process.cwd(), input);
 const source = fs.readFileSync(absolute, "utf8");
 const errors = [];
-const appStart = source.indexOf("CANVAS_APP_START");
-const appEnd = source.indexOf("CANVAS_APP_END");
-const appSource = appStart >= 0 && appEnd > appStart ? source.slice(appStart, appEnd) : "";
+const appStartMarker = "/* CANVAS_APP_START */";
+const appEndMarker = "/* CANVAS_APP_END */";
+const appStart = source.indexOf(appStartMarker);
+const appEnd = source.indexOf(appEndMarker);
+const appContentStart = appStart >= 0 ? appStart + appStartMarker.length : -1;
+const appSource = appContentStart >= 0 && appEnd > appContentStart ? source.slice(appContentStart, appEnd) : "";
+const appLineOffset = appContentStart >= 0 ? source.slice(0, appContentStart).split("\n").length - 1 : 0;
+
+function sourceLine(line) {
+  return source.split("\n")[line - 1]?.trim() ?? "";
+}
+
+function locatedError(message, location) {
+  if (!location?.line) return message;
+  const line = location.line + appLineOffset;
+  const excerpt = sourceLine(line);
+  return `${message} (line ${line}${excerpt ? `: ${excerpt}` : ""})`;
+}
+
+function rejectPattern(pattern, message) {
+  const match = appSource.match(pattern);
+  if (!match) return;
+  const line = appSource.slice(0, match.index).split("\n").length;
+  errors.push(locatedError(message, { line }));
+}
+
+function findModuleSyntax(node, matches = []) {
+  if (!node || typeof node !== "object") return matches;
+  if (
+    node.type === "ImportDeclaration" ||
+    node.type === "ImportExpression" ||
+    node.type === "ExportNamedDeclaration" ||
+    node.type === "ExportDefaultDeclaration" ||
+    node.type === "ExportAllDeclaration" ||
+    (node.type === "CallExpression" && node.callee?.type === "Import") ||
+    (node.type === "MetaProperty" && node.meta?.name === "import")
+  ) {
+    matches.push(node);
+  }
+  for (const value of Object.values(node)) {
+    if (Array.isArray(value)) {
+      for (const child of value) findModuleSyntax(child, matches);
+    } else if (value && typeof value === "object" && typeof value.type === "string") {
+      findModuleSyntax(value, matches);
+    }
+  }
+  return matches;
+}
 
 const required = [
   ["<!doctype html>", "HTML doctype"],
@@ -52,13 +98,22 @@ for (const [needle, label] of required) {
 
 if (source.includes("/*__STANDALONE_CANVAS_UMD__*/")) errors.push("Runtime placeholder was not replaced");
 if (!appSource) errors.push("Editable application block is missing or malformed");
-if (/\b(?:import|export)\s/m.test(appSource)) errors.push("Module syntax is not allowed");
-if (/\brequire\s*\(/m.test(appSource)) errors.push("CommonJS require is not allowed in app code");
-if (/\b(?:fetch|XMLHttpRequest|WebSocket|EventSource)\s*\(/m.test(appSource)) errors.push("Report data network requests are not allowed");
-if (/React\.createElement\s*\(/m.test(appSource)) errors.push("Write readable JSX instead of React.createElement calls");
-if (/(?:linear-gradient|radial-gradient|background-clip\s*:\s*text|boxShadow\s*:|box-shadow\s*:)/i.test(appSource)) errors.push("Gradients and box shadows are not allowed");
-if (/["'`]#[0-9a-f]{3,8}\b/i.test(appSource)) errors.push("Use useHostTheme() tokens instead of hardcoded hex colors");
-if (/\bTODO\b|Add header here|Placeholder content/i.test(appSource)) errors.push("Placeholder content is not allowed");
+if (appSource) {
+  try {
+    const ast = babelParser.parse(appSource, { sourceType: "module", plugins: ["jsx"] });
+    for (const node of findModuleSyntax(ast.program)) {
+      errors.push(locatedError("Module syntax is not allowed", node.loc?.start));
+    }
+  } catch (error) {
+    errors.push(locatedError(`Application JSX could not be parsed: ${error.reasonCode ?? error.message}`, error.loc));
+  }
+}
+rejectPattern(/\brequire\s*\(/m, "CommonJS require is not allowed in app code");
+rejectPattern(/\b(?:fetch|XMLHttpRequest|WebSocket|EventSource)\s*\(/m, "Report data network requests are not allowed");
+rejectPattern(/React\.createElement\s*\(/m, "Write readable JSX instead of React.createElement calls");
+rejectPattern(/(?:linear-gradient|radial-gradient|background-clip\s*:\s*text|boxShadow\s*:|box-shadow\s*:)/i, "Gradients and box shadows are not allowed");
+rejectPattern(/["'`]#[0-9a-f]{3,8}\b/i, "Use useHostTheme() tokens instead of hardcoded hex colors");
+rejectPattern(/\bTODO\b|Add header here|Placeholder content/i, "Placeholder content is not allowed");
 if (!/\bCanvasProvider\b/.test(appSource)) errors.push("Application must use CanvasProvider");
 if (!/\bstoragePrefix\s*[:=]/.test(appSource)) errors.push("CanvasProvider must use an artifact-specific storagePrefix");
 
